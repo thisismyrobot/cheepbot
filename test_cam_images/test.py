@@ -11,31 +11,33 @@ import cv2
 import json
 
 
-def go(first, second, out):
-    img1 = cv2.imread(first, 0)  # Initial image.
-    img2 = cv2.imread(second, 0)  # Taken 1m away.
+def go(existing, new, out):
+    img_new = cv2.imread(new, 0)  # Taken 1m away.
+    img_existing = cv2.imread(existing, 0)  # Initial/existing/baseline image.
 
     sift = cv2.xfeatures2d.SIFT_create()
 
-    kp1, des1 = sift.detectAndCompute(img1, None)
-    kp2, des2 = sift.detectAndCompute(img2, None)
+    kp_new, des_new = sift.detectAndCompute(img_new, None)
+    kp_existing, des_existing = sift.detectAndCompute(img_existing, None)
 
     FLANN_INDEX_KDTREE = 1
-    index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees = 5)
     search_params = dict(checks=50)   # or pass empty dictionary
-    flann = cv2.FlannBasedMatcher(index_params,search_params)
-    matches = flann.knnMatch(des1, des2, k=2)
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+    matches = flann.knnMatch(des_new, des_existing, k=2)
 
     matchesMask = [[0,0] for i in range(len(matches))]
     # ratio test as per Lowe's paper
-    for i,(m,n) in enumerate(matches):
+    for i,(m, n) in enumerate(matches):
         if m.distance < 0.7*n.distance:
             matchesMask[i]=[1,0]
     draw_params = dict(matchColor = (0,255,0),
                        singlePointColor = (255,0,0),
                        matchesMask = matchesMask,
                        flags = 0)
-    img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, **draw_params)
+
+    img3 = cv2.drawMatchesKnn(img_new, kp_new, img_existing, kp_existing, matches, None, **draw_params)
     cv2.imwrite(out, img3)
 
 
