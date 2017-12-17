@@ -1,5 +1,7 @@
 """Look for commonalities between the two test images.
 
+The pairs are about 1m apart.
+
 Based on:
 
     https://docs.opencv.org/3.3.0/dc/dc3/tutorial_py_matcher.html
@@ -9,9 +11,9 @@ import cv2
 import json
 
 
-def go():
-    img1 = cv2.imread('first.jpg', 0)  # Initial image.
-    img2 = cv2.imread('second.jpg', 0)  # Taken 1m away.
+def go(first, second, out):
+    img1 = cv2.imread(first, 0)  # Initial image.
+    img2 = cv2.imread(second, 0)  # Taken 1m away.
 
     sift = cv2.xfeatures2d.SIFT_create()
 
@@ -34,8 +36,9 @@ def go():
                        matchesMask = matchesMask,
                        flags = 0)
     img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, **draw_params)
-    cv2.imwrite('matches.jpg', img3)
+    cv2.imwrite(out, img3)
 
 
 if __name__ == '__main__':
-    go()
+    go('first.jpg', 'second.jpg', 'matches1.jpg')
+    go('third.jpg', 'fourth.jpg', 'matches2.jpg')

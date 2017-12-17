@@ -2,7 +2,9 @@
 
 This is just some hacking around, not a project to riff off.
 
-![Match](image.jpg?raw=true "Match")
+![Matches 1](test_cam_images/matches1.jpg?raw=true "Matches 1")
+
+![Matches 2](test_cam_images/matches2.jpg?raw=true "Matches 2")
 
 # Setup
 
