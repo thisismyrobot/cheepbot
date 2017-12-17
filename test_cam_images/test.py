@@ -7,8 +7,9 @@ Based on:
     https://docs.opencv.org/3.3.0/dc/dc3/tutorial_py_matcher.html
 
 """
+import numpy
 import cv2
-import json
+import statistics
 
 
 def go(existing, new, out):
@@ -27,18 +28,50 @@ def go(existing, new, out):
 
     matches = flann.knnMatch(des_new, des_existing, k=2)
 
-    matchesMask = [[0,0] for i in range(len(matches))]
-    # ratio test as per Lowe's paper
+    offsets_x = []
+    offsets_y = []
     for i,(m, n) in enumerate(matches):
-        if m.distance < 0.7*n.distance:
-            matchesMask[i]=[1,0]
-    draw_params = dict(matchColor = (0,255,0),
-                       singlePointColor = (255,0,0),
-                       matchesMask = matchesMask,
-                       flags = 0)
+        if m.distance >= 0.7 * n.distance:
+            continue
 
-    img3 = cv2.drawMatchesKnn(img_new, kp_new, img_existing, kp_existing, matches, None, **draw_params)
-    cv2.imwrite(out, img3)
+        existing_x, existing_y = kp_existing[m.trainIdx].pt
+        new_x, new_y = kp_new[m.queryIdx].pt
+
+        offsets_x.append(existing_x - new_x)
+        offsets_y.append(existing_y - new_y)
+
+    offset_x = statistics.median(offsets_x)
+    offset_y = statistics.median(offsets_y)
+
+    alpha_existing = numpy.ones(img_existing.shape, dtype=img_existing.dtype) * 50
+
+    padded_existing = cv2.copyMakeBorder(
+        cv2.merge((img_existing, img_existing, img_existing, alpha_existing)),
+        int(-offset_y) if offset_y < 0 else 0,
+        int(offset_y) if offset_y > 0 else 0,
+        int(-offset_x) if offset_x < 0 else 0,
+        int(offset_x) if offset_x > 0 else 0,
+        cv2.BORDER_CONSTANT,
+        value=(0, 0, 0, 0)
+    )
+
+    alpha_new = numpy.ones(img_new.shape, dtype=img_new.dtype) * 50
+
+    padded_new = cv2.copyMakeBorder(
+        cv2.merge((img_new, img_new, img_new, alpha_new)),
+        int(offset_y) if offset_y > 0 else 0,
+        int(-offset_y) if offset_y < 0 else 0,
+        int(offset_x) if offset_x > 0 else 0,
+        int(-offset_x) if offset_x < 0 else 0,
+        cv2.BORDER_CONSTANT,
+        value=(0, 0, 0, 0)
+    )
+
+    # TODO: Need to actually fade in and out based on how far moved and direction.
+    new_background = cv2.addWeighted(padded_existing, 0.5, padded_new, 0.5, 0)
+
+    cv2.imwrite(out, new_background)
+
 
 
 if __name__ == '__main__':
