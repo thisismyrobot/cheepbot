@@ -2,7 +2,7 @@
 
 This is just some hacking around, not a project to riff off.
 
-![Matches 1](test_cam_images/matches1.jpg?raw=true "Matches 1")
+![Matches 1](test_cam_images/matches1.png?raw=true "Matches 1")
 
 # Setup
 
