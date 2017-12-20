@@ -40,40 +40,48 @@ def go(existing, new, out):
         offsets_x.append(existing_x - new_x)
         offsets_y.append(existing_y - new_y)
 
-    offset_x = statistics.median(offsets_x)
-    offset_y = statistics.median(offsets_y)
+    offset_x = int(statistics.median(offsets_x))
+    offset_y = int(statistics.median(offsets_y))
 
-    alpha_existing = numpy.ones(img_existing.shape, dtype=img_existing.dtype) * 50
-
-    padded_existing = cv2.copyMakeBorder(
-        cv2.merge((img_existing, img_existing, img_existing, alpha_existing)),
-        int(-offset_y) if offset_y < 0 else 0,
-        int(offset_y) if offset_y > 0 else 0,
-        int(-offset_x) if offset_x < 0 else 0,
-        int(offset_x) if offset_x > 0 else 0,
+    # Pad out existing with transparency.
+    img_existing = cv2.copyMakeBorder(
+        img_existing,
+#        cv2.cvtColor(img_existing, cv2.COLOR_GRAY2RGBA),
+        -offset_y if offset_y < 0 else 0,
+        offset_y if offset_y > 0 else 0,
+        -offset_x if offset_x < 0 else 0,
+        offset_x if offset_x > 0 else 0,
         cv2.BORDER_CONSTANT,
-        value=(0, 0, 0, 0)
+        value=(0, 0, 0)
     )
 
-    alpha_new = numpy.ones(img_new.shape, dtype=img_new.dtype) * 50
+    # position
+    if offset_x < 0:
+        # New is out to left.
+        if offset_y < 0:
+            # New is out above
+            img_existing[0:offset_y, 0:-offset_x] = img_new[0:, 0:-offset_x]
+            img_existing[0:-offset_y, -offset_x:] = img_new[0:-offset_y, 0:]
 
-    padded_new = cv2.copyMakeBorder(
-        cv2.merge((img_new, img_new, img_new, alpha_new)),
-        int(offset_y) if offset_y > 0 else 0,
-        int(-offset_y) if offset_y < 0 else 0,
-        int(offset_x) if offset_x > 0 else 0,
-        int(-offset_x) if offset_x < 0 else 0,
-        cv2.BORDER_CONSTANT,
-        value=(0, 0, 0, 0)
-    )
 
-    # TODO: Need to actually fade in and out based on how far moved and direction.
-    new_background = cv2.addWeighted(padded_existing, 0.5, padded_new, 0.5, 0)
+    cv2.imwrite(out, img_existing)
 
-    cv2.imwrite(out, new_background)
 
+    # Pad out new with transparency.
+#    img_new = cv2.copyMakeBorder(
+#        cv2.cvtColor(img_new, cv2.COLOR_GRAY2RGBA),
+#        int(offset_y) if offset_y > 0 else 0,
+#        int(-offset_y) if offset_y < 0 else 0,
+#        int(offset_x) if offset_x > 0 else 0,
+#        int(-offset_x) if offset_x < 0 else 0,
+#        cv2.BORDER_CONSTANT,
+#        value=(0, 0, 0, 0)
+#    )
+
+#    img_result = cv2.addWeighted(img_new, 0.5, img_existing, 0.5, 0)
+
+#    cv2.imwrite(out, img_result)
 
 
 if __name__ == '__main__':
-    go('first.jpg', 'second.jpg', 'matches1.jpg')
-    go('third.jpg', 'fourth.jpg', 'matches2.jpg')
+    go('first.jpg', 'second.jpg', 'matches1.png')
