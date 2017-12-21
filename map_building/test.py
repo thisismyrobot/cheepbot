@@ -53,7 +53,7 @@ def add_to_map(img_map, img_new, offset_x, offset_y):
 
     # Re-overlay the new, dithered
     out_row_start, out_row_size = 0, img_new.shape[0]
-    out_col_start, out_col_size= 0, img_new.shape[1]
+    out_col_start, out_col_size = 0, img_new.shape[1]
     img_result[
         out_row_start:out_row_size:2,
         out_col_start:out_col_size:2,
