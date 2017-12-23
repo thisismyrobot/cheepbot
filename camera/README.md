@@ -12,8 +12,7 @@ On the Pi, as tested in Python 3.5:
 
 On the Pi, as tested in Python 3.5:
 
-    source venv/bin/activate
-    python serve.py
+    ./serve.sh
 
 ## Accessing images
 
