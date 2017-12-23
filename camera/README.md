@@ -5,11 +5,14 @@
 On the Pi, as tested in Python 3.5:
 
     python3 -m venv venv
-    source venv\scripts\activate
+    source venv/bin/activate
     pip install -r requirements.txt
 
 ## Running it
 
+On the Pi, as tested in Python 3.5:
+
+    source venv/bin/activate
     python serve.py
 
 ## Accessing images
