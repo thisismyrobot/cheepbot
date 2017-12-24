@@ -1,6 +1,4 @@
-"""Look for commonalities between the two test images.
-
-The pairs are about 1m apart.
+"""Look for commonalities across sets of images to build a map.
 
 Based on:
 
