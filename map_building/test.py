@@ -7,9 +7,11 @@ Based on:
     https://docs.opencv.org/3.3.0/dc/dc3/tutorial_py_matcher.html
 
 """
-import numpy
-import cv2
+import glob
 import statistics
+
+import cv2
+import numpy
 
 
 def offsets(matches, kp_existing, kp_new):
@@ -35,47 +37,47 @@ def offsets(matches, kp_existing, kp_new):
     return offset_x, offset_y
 
 
+def map_pad(dim_map, dim_new, offset):
+    """Return a map value from the map size, new image size and offset."""
+    size_diff = dim_map - dim_new
+    return max(0, int((size_diff / 2) + offset - size_diff))
+
+
 def add_to_map(img_map, img_new, offset_x, offset_y):
     """Apply a new image to an existing map and return."""
-    # Pad out new image to fit map size + offsets.
+
+    # Pad out the map to fit the new image.
+    pad_top = map_pad(img_map.shape[0], img_new.shape[0], -offset_y)
+    pad_bottom = map_pad(img_map.shape[0], img_new.shape[0], offset_y)
+    pad_left = map_pad(img_map.shape[1], img_new.shape[1], -offset_x)
+    pad_right = map_pad(img_map.shape[1], img_new.shape[1], offset_x)
     img_result = cv2.copyMakeBorder(
-        img_new,
-        offset_y if offset_y > 0 else 0,
-        -offset_y if offset_y < 0 else 0,
-        offset_x if offset_x > 0 else 0,
-        -offset_x if offset_x < 0 else 0,
+        img_map,
+        pad_top,
+        pad_bottom,
+        pad_left,
+        pad_right,
         cv2.BORDER_CONSTANT,
-        value=(0, 0, 0)
+        value=(0, 0, 0),
     )
 
-    # Overlay the map
-    img_result[-offset_y:, -offset_x:] = img_map[0:, 0:]
-
-    # Re-overlay the new, dithered
-    out_row_start, out_row_size = 0, img_new.shape[0]
-    out_col_start, out_col_size = 0, img_new.shape[1]
+    # Overlay the new image
+    map_row_start = max(offset_y, 0)
+    map_row_size = img_new.shape[0] + max(offset_y, 0)
+    map_col_start = max(offset_x, 0)
+    map_col_size = img_new.shape[1] + max(offset_x, 0)
     img_result[
-        out_row_start:out_row_size:2,
-        out_col_start:out_col_size:2,
+        map_row_start:map_row_size,
+        map_col_start:map_col_size,
     ] = img_new[
-        out_row_start:out_row_size:2,
-        out_col_start:out_col_size:2,
-    ]
-    img_result[
-        out_row_start+1:out_row_size:2,
-        out_col_start+1:out_col_size:2,
-    ] = img_new[
-        out_row_start+1:out_row_size:2,
-        out_col_start+1:out_col_size:2,
+        0:img_new.shape[0],
+        0:img_new.shape[1],
     ]
 
     return img_result
 
 
-def go(existing_map, new, out):
-    img_new = cv2.imread(new, 0)  # Taken 1m away.
-    img_map = cv2.imread(existing_map, 0)  # Initial/existing/baseline image.
-
+def step(img_map, img_new):
     sift = cv2.xfeatures2d.SIFT_create()
 
     kp_new, des_new = sift.detectAndCompute(img_new, None)
@@ -92,8 +94,23 @@ def go(existing_map, new, out):
 
     img_updated_map = add_to_map(img_map, img_new, offset_x, offset_y)
 
-    cv2.imwrite(out, img_updated_map)
+    return img_updated_map
+
+
+def process_test():
+
+    img_map = None
+    for file in glob.glob('img/*.jpg'):
+
+        if img_map is None:
+            img_map = cv2.imread(file, 0)
+            continue
+
+        img_new = cv2.imread(file, 0)
+        img_map = step(img_map, img_new)
+
+    cv2.imwrite('combined.png', img_map)
 
 
 if __name__ == '__main__':
-    go('first.jpg', 'second.jpg', 'combined.png')
+    process_test()
