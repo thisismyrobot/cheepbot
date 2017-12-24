@@ -38,17 +38,17 @@ def offsets(matches, kp_existing, kp_new):
 def map_pad(dim_map, dim_new, offset):
     """Return a map value from the map size, new image size and offset."""
     size_diff = dim_map - dim_new
-    return max(0, int((size_diff / 2) + offset - size_diff))
+    return int((size_diff / 2) + offset - size_diff)
 
 
 def add_to_map(img_map, img_new, offset_x, offset_y):
     """Apply a new image to an existing map and return."""
 
     # Pad out the map to fit the new image.
-    pad_top = map_pad(img_map.shape[0], img_new.shape[0], -offset_y)
-    pad_bottom = map_pad(img_map.shape[0], img_new.shape[0], offset_y)
-    pad_left = map_pad(img_map.shape[1], img_new.shape[1], -offset_x)
-    pad_right = map_pad(img_map.shape[1], img_new.shape[1], offset_x)
+    pad_top = max(0, map_pad(img_map.shape[0], img_new.shape[0], -offset_y))
+    pad_bottom = max(0, map_pad(img_map.shape[0], img_new.shape[0], offset_y))
+    pad_left = max(0, map_pad(img_map.shape[1], img_new.shape[1], -offset_x))
+    pad_right = max(0, map_pad(img_map.shape[1], img_new.shape[1], offset_x))
     img_result = cv2.copyMakeBorder(
         img_map,
         pad_top,
@@ -75,7 +75,7 @@ def add_to_map(img_map, img_new, offset_x, offset_y):
     return img_result
 
 
-def step(img_map, img_new):
+def step(map_path, img_map, img_new):
     sift = cv2.xfeatures2d.SIFT_create()
 
     kp_new, des_new = sift.detectAndCompute(img_new, None)
@@ -92,20 +92,37 @@ def step(img_map, img_new):
 
     img_updated_map = add_to_map(img_map, img_new, offset_x, offset_y)
 
-    return img_updated_map
+    updated_path = [(int(x - offset_x),
+                     int(y - offset_y))
+                     for (x, y)
+                     in map_path]
+    updated_path.append((int(img_updated_map.shape[1] / 2), int(img_updated_map.shape[0] / 2)))
+
+    return updated_path, img_updated_map
 
 
 def process_test():
 
     img_map = None
+    map_path = []
     for file in glob.glob('img/*.jpg'):
 
         if img_map is None:
             img_map = cv2.imread(file, 0)
+            map_path = [(int(img_map.shape[1] / 2), int(img_map.shape[0] / 2))]
             continue
 
         img_new = cv2.imread(file, 0)
-        img_map = step(img_map, img_new)
+        map_path, img_map = step(map_path, img_map, img_new)
+
+    print(map_path)
+    start = map_path.pop(0)
+    while True:
+        if len(map_path) == 0:
+            break
+        next = map_path.pop(0)
+        cv2.line(img_map, start, next, (255,0,0), 2)
+        start = next
 
     cv2.imwrite('combined.png', img_map)
 
