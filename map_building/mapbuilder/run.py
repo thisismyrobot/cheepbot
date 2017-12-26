@@ -222,8 +222,10 @@ def rotate_and_crop(img, rotation):
     max_dim = int(rows / math.sqrt(2))  # Borderless rotation.
     vert_crop = (rows - max_dim) // 2
     horiz_crop = (cols - max_dim) // 2
-    print(vert_crop, horiz_crop)
-    return img_rotated[vert_crop:max_dim, horiz_crop:max_dim]
+    return img_rotated[
+        vert_crop:vert_crop+max_dim,
+        horiz_crop:horiz_crop+max_dim
+    ]
 
 
 def process_test():
