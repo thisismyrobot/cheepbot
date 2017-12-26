@@ -133,25 +133,25 @@ def save_step_debug(step_index, img_new, kp_new, img_map, kp_map, matches, offse
         (x + offset_x, y + offset_y)
     )
 
-
     # Save it.
     cv2.imwrite('debug_{}.png'.format(step_index), step_img)
 
 
-def step(map_path, img_map, img_new, debug=False):
+def step(map_path, img_map, img_new, rotation, debug=False):
     """Given a new image, update the map and path."""
+    img_new = rotate_and_crop(img_new, -rotation)
+
     sift = cv2.xfeatures2d.SIFT_create()
 
-    kp_new, des_new = sift.detectAndCompute(img_new, None)
     kp_map, des_map = sift.detectAndCompute(img_map, None)
+    kp_new, des_new = sift.detectAndCompute(img_new, None)
 
     FLANN_INDEX_KDTREE = 1
-    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees = 5)
-    search_params = dict(checks=50)   # or pass empty dictionary
+    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+    search_params = dict(checks=50)
     flann = cv2.FlannBasedMatcher(index_params, search_params)
 
     matches = flann.knnMatch(des_new, des_map, k=2)
-
     offset_x, offset_y = offsets(matches, kp_map, kp_new)
 
     img_updated_map, paddings, new_centre = add_to_map(
@@ -215,10 +215,15 @@ def add_overlays(img_map, map_path):
     add_text(img_map, idx, start)
 
 
-def rotate_and_crop(img, rotation):
+def rotate_and_crop(img, rotation=0):
     rows, cols = img.shape[:2]
-    the_matrix = cv2.getRotationMatrix2D((rows / 2, cols / 2), rotation, 1)
-    img_rotated = cv2.warpAffine(img, the_matrix, (cols, rows))
+
+    if rotation is None:
+        img_rotated = img
+    else:
+        the_matrix = cv2.getRotationMatrix2D((rows / 2, cols / 2), rotation, 1)
+        img_rotated = cv2.warpAffine(img, the_matrix, (cols, rows))
+
     max_dim = int(rows / math.sqrt(2))  # Borderless rotation.
     vert_crop = (rows - max_dim) // 2
     horiz_crop = (cols - max_dim) // 2
@@ -243,12 +248,10 @@ def process_test():
 
         # yuck.
         rotation = float('.'.join(file.split('_')[-1].split('.')[:-1]))
-        img_new = rotate_and_crop(img_new, -rotation)
 
-        map_path, img_map = step(map_path, img_map, img_new, debug=True)
+        map_path, img_map = step(map_path, img_map, img_new, rotation, debug=True)
 
     add_overlays(img_map, map_path)
-
     cv2.imwrite('combined.png', img_map)
 
 
