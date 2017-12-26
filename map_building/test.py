@@ -141,6 +141,19 @@ def middle_coordinates(img):
     )
 
 
+def draw_index(img, index, location):
+    cv2.putText(
+        img,
+        str(index),
+        location,
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.3,
+        (0, 0, 0),
+        1,
+        cv2.LINE_AA
+    )
+
+
 def add_overlays(img_map, map_path):
     """Add overlays to the evolving map."""
     idx = 0
@@ -150,10 +163,10 @@ def add_overlays(img_map, map_path):
             break
         next = map_path.pop(0)
         cv2.line(img_map, start, next, (255,0,0), 2)
-        cv2.putText(img_map,str(idx),start, cv2.FONT_HERSHEY_SIMPLEX, 0.3,(0,0,0),1,cv2.LINE_AA)
+        draw_index(img_map, idx, start)
         start = next
         idx += 1
-    cv2.putText(img_map,str(idx),start, cv2.FONT_HERSHEY_SIMPLEX, 0.3,(0,0,0),1,cv2.LINE_AA)
+    draw_index(img_map, idx, start)
 
 
 def process_test():
