@@ -1,3 +1,7 @@
+"""Copy angles from filenames into EXIF metadata.
+
+Expects filenames like [number]_[angle].jpg.
+"""
 import glob
 
 import piexif
