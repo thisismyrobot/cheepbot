@@ -45,19 +45,23 @@ def offsets(matches, kp_map, kp_new):
     return offset_x, offset_y
 
 
-def add_to_map(img_map, img_new, offset_x, offset_y):
+def add_to_map(img_map, loc_map, img_new, offset_x, offset_y):
     """Apply a new image to an existing map and return."""
 
     # Pad out the map to fit the new image.
-    paddings = geometry.paddings(img_map.shape, img_new.shape, offset_x, offset_y)
+    paddings = geometry.paddings(
+        img_map.shape,
+        img_new.shape,
+        offset_x,
+        offset_y
+    )
     img_result = cv2.copyMakeBorder(
         img_map,
         paddings[Paddings.Top],
         paddings[Paddings.Bottom],
         paddings[Paddings.Left],
         paddings[Paddings.Right],
-        cv2.BORDER_CONSTANT,
-        value=(0, 0, 0),
+        cv2.BORDER_REPLICATE
     )
 
     # Overlay the new image
@@ -73,7 +77,7 @@ def add_to_map(img_map, img_new, offset_x, offset_y):
         0:img_new.shape[1],
     ]
 
-    return img_result, paddings, (  # Location in the new map of the center of the new image.
+    return img_result, paddings, (  # Location in the new map of the centre of the new image.
         map_col_start + (img_new.shape[1] // 2),
         map_row_start + (img_new.shape[0] // 2),
     )
@@ -148,7 +152,13 @@ def step(map_path, img_map, img_new, debug=False):
 
     offset_x, offset_y = offsets(matches, kp_map, kp_new)
 
-    img_updated_map, paddings, new_centre = add_to_map(img_map, img_new, offset_x, offset_y)
+    img_updated_map, paddings, new_centre = add_to_map(
+        img_map,
+        map_path[-1],  # Current location on existing map.
+        img_new,
+        offset_x,
+        offset_y
+    )
 
     map_path = shift_path(map_path, paddings[Paddings.Top], paddings[Paddings.Left])
     map_path.append(new_centre)
