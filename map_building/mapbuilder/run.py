@@ -12,6 +12,7 @@ import statistics
 
 import cv2
 import numpy
+import piexif
 
 import mapbuilder.geometry as geometry
 
@@ -233,6 +234,16 @@ def rotate_and_crop(img, rotation=0):
     ]
 
 
+def read_rotation(img_f):
+    """Grab the orientation from the EXIF data."""
+    meta = piexif.load(img_f.read())
+    try:
+        angle, nom = meta['GPS'][piexif.GPSIFD.GPSImgDirection]
+        return angle / nom
+    except KeyError:
+        return 0
+
+
 def process_test():
 
     img_map = None
@@ -246,8 +257,10 @@ def process_test():
 
         img_new = cv2.imread(file, 0)
 
-        # yuck.
-        rotation = float('.'.join(file.split('_')[-1].split('.')[:-1]))
+        with open(file, 'rb') as img_f:
+            rotation = read_rotation(img_f)
+
+        print(rotation)
 
         map_path, img_map = step(map_path, img_map, img_new, rotation, debug=True)
 
