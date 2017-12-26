@@ -7,6 +7,7 @@ Based on:
 """
 import enum
 import glob
+import math
 import statistics
 
 import cv2
@@ -61,7 +62,8 @@ def add_to_map(img_map, loc_map, img_new, offset_x, offset_y):
         paddings[Paddings.Bottom],
         paddings[Paddings.Left],
         paddings[Paddings.Right],
-        cv2.BORDER_REPLICATE
+        cv2.BORDER_CONSTANT,
+        value=(0,)
     )
 
     # Overlay the new image
@@ -213,6 +215,17 @@ def add_overlays(img_map, map_path):
     add_text(img_map, idx, start)
 
 
+def rotate_and_crop(img, rotation):
+    rows, cols = img.shape[:2]
+    the_matrix = cv2.getRotationMatrix2D((rows / 2, cols / 2), rotation, 1)
+    img_rotated = cv2.warpAffine(img, the_matrix, (cols, rows))
+    max_dim = int(rows / math.sqrt(2))  # Borderless rotation.
+    vert_crop = (rows - max_dim) // 2
+    horiz_crop = (cols - max_dim) // 2
+    print(vert_crop, horiz_crop)
+    return img_rotated[vert_crop:max_dim, horiz_crop:max_dim]
+
+
 def process_test():
 
     img_map = None
@@ -225,6 +238,11 @@ def process_test():
             continue
 
         img_new = cv2.imread(file, 0)
+
+        # yuck.
+        rotation = float('.'.join(file.split('_')[-1].split('.')[:-1]))
+        img_new = rotate_and_crop(img_new, -rotation)
+
         map_path, img_map = step(map_path, img_map, img_new, debug=True)
 
     add_overlays(img_map, map_path)
