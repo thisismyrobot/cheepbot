@@ -1,5 +1,7 @@
 # Map building off images.
 
+![Combined](combined.png?raw=true "Combined")
+
 ## Setup
 
 As tested with Python 3.6 on Windows:
