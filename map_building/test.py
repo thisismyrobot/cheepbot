@@ -72,7 +72,10 @@ def add_to_map(img_map, img_new, offset_x, offset_y):
         0:img_new.shape[1],
     ]
 
-    return img_result
+    return img_result, (  # Location in the new map of the center of the new image.
+        int(map_col_start + (img_new.shape[1] / 2)),
+        int(map_row_start + (img_new.shape[0] / 2)),
+    )
 
 
 def step(map_path, img_map, img_new):
@@ -90,39 +93,57 @@ def step(map_path, img_map, img_new):
 
     offset_x, offset_y = offsets(matches, kp_existing, kp_new)
 
-    img_updated_map = add_to_map(img_map, img_new, offset_x, offset_y)
+    img_updated_map, (x_center, y_center) = add_to_map(img_map, img_new, offset_x, offset_y)
+
+    print (map_path[-1], (x_center, y_center))
 
     updated_path = [(int(x - offset_x),
                      int(y - offset_y))
-                     for (x, y)
-                     in map_path]
-    updated_path.append((int(img_updated_map.shape[1] / 2), int(img_updated_map.shape[0] / 2)))
+                    for (x, y)
+                    in map_path]
+
+#    updated_path = map_path
+    updated_path.append((x_center, y_center))
+
+    print((x_center, y_center))
 
     return updated_path, img_updated_map
+
+
+def middle_coordinates(img):
+    """Return a tuple of (x, y) pixel coordinates."""
+    return (
+        int(img.shape[1] / 2),
+        int(img.shape[0] / 2)
+    )
 
 
 def process_test():
 
     img_map = None
     map_path = []
-    for file in glob.glob('img/*.jpg'):
+    for file in sorted(glob.glob('img/*.jpg'))[:2]:
 
         if img_map is None:
             img_map = cv2.imread(file, 0)
-            map_path = [(int(img_map.shape[1] / 2), int(img_map.shape[0] / 2))]
+            map_path.append(middle_coordinates(img_map))
             continue
 
         img_new = cv2.imread(file, 0)
         map_path, img_map = step(map_path, img_map, img_new)
 
-    print(map_path)
+    idx = 0
     start = map_path.pop(0)
     while True:
         if len(map_path) == 0:
             break
         next = map_path.pop(0)
         cv2.line(img_map, start, next, (255,0,0), 2)
+        cv2.putText(img_map,str(idx),start, cv2.FONT_HERSHEY_SIMPLEX, 0.3,(0,0,0),1,cv2.LINE_AA)
         start = next
+        idx += 1
+    cv2.putText(img_map,str(idx),start, cv2.FONT_HERSHEY_SIMPLEX, 0.3,(0,0,0),1,cv2.LINE_AA)
+
 
     cv2.imwrite('combined.png', img_map)
 
