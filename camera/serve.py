@@ -11,7 +11,7 @@ app = flask.Flask(__name__)
 camera = None
 
 
-def add_rotation(img_data):
+def add_rotation(img_stream):
     """Add rotation information to the exif data."""
     rotation = 0  # Until we get a sensor...
     gps_tags = {
@@ -20,7 +20,7 @@ def add_rotation(img_data):
     }
     exif_bytes = piexif.dump({'GPS': gps_tags})
     updated_stream = io.BytesIO()
-    piexif.insert(exif_bytes, img_data.read(), updated_stream)
+    piexif.insert(exif_bytes, img_stream.getvalue(), updated_stream)
     return updated_stream
 
 
@@ -35,5 +35,5 @@ def photo():
 
 if __name__ == '__main__':
     camera = picamera.PiCamera()
-    camera.resolution = (640, 480)
+    camera.resolution = (640, 640)
     waitress.serve(app, listen='*:10000')
