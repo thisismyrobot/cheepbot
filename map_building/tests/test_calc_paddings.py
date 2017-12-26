@@ -124,7 +124,7 @@ def test_smaller_box_contained_moving_left_and_exceeding_container():
     assert paddings(map_shape, new_shape, *offsets) == (0, 0, 1, 0)
 
 
-def test_smaller_box_contained_moving_up_and_exceeding_container():
+def test_smaller_box_contained_moving_right_and_exceeding_container():
     map_shape = [20, 20]
     new_shape = [10, 10]
     offsets = (6, 0)
