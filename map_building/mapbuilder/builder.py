@@ -234,9 +234,9 @@ def rotate_and_crop(img, rotation=0):
     ]
 
 
-def read_rotation(img_f):
+def read_rotation(img_data):
     """Grab the orientation from the EXIF data."""
-    meta = piexif.load(img_f.read())
+    meta = piexif.load(img_data)
     try:
         angle, nom = meta['GPS'][piexif.GPSIFD.GPSImgDirection]
         return angle / nom
@@ -258,9 +258,7 @@ def process_test():
         img_new = cv2.imread(file, 0)
 
         with open(file, 'rb') as img_f:
-            rotation = read_rotation(img_f)
-
-        print(rotation)
+            rotation = read_rotation(img_f.read())
 
         map_path, img_map = step(map_path, img_map, img_new, rotation, debug=True)
 
