@@ -1,2 +1,4 @@
 */venv/
 map_building/debug_*.png
+*.pyc
+.cache
