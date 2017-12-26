@@ -20,7 +20,7 @@ class Paddings(enum.IntEnum):
     Right = 3
 
 
-def offsets(matches, kp_existing, kp_new):
+def offsets(matches, kp_map, kp_new):
     """Given SIFT and knnMatch data, return the offset between the images.
 
     Assumes some overlap.
@@ -31,11 +31,11 @@ def offsets(matches, kp_existing, kp_new):
         if m.distance >= 0.7 * n.distance:
             continue
 
-        existing_x, existing_y = kp_existing[m.trainIdx].pt
+        map_x, map_y = kp_map[m.trainIdx].pt
         new_x, new_y = kp_new[m.queryIdx].pt
 
-        offsets_x.append(existing_x - new_x)
-        offsets_y.append(existing_y - new_y)
+        offsets_x.append(map_x - new_x)
+        offsets_y.append(map_y - new_y)
 
     offset_x = int(statistics.median(offsets_x))
     offset_y = int(statistics.median(offsets_y))
@@ -46,7 +46,7 @@ def offsets(matches, kp_existing, kp_new):
 def map_pad(dim_map, dim_new, offset):
     """Return a map value from the map size, new image size and offset."""
     size_diff = dim_map - dim_new
-    return int((size_diff / 2) + offset - size_diff)
+    return (size_diff // 2) + offset - size_diff
 
 
 def calc_paddings(shape_map, shape_new, offset_x, offset_y):
@@ -91,8 +91,8 @@ def add_to_map(img_map, img_new, offset_x, offset_y):
     ]
 
     return img_result, paddings, (  # Location in the new map of the center of the new image.
-        int(map_col_start + (img_new.shape[1] / 2)),
-        int(map_row_start + (img_new.shape[0] / 2)),
+        map_col_start + (img_new.shape[1] // 2),
+        map_row_start + (img_new.shape[0] // 2),
     )
 
 
@@ -107,26 +107,80 @@ def shift_path(existing_path, padding_top, padding_left):
             in existing_path]
 
 
-def step(map_path, img_map, img_new):
+def save_progress(step_index, img_new, kp_new, img_map, kp_map, matches, offset_x, offset_y):
+    """Diagnostic-helpers tracking progress."""
+
+    # Basic KNN data.
+    matchesMask = [[0,0] for i in range(len(matches))]
+    for i,(m,n) in enumerate(matches):
+        if m.distance < 0.7*n.distance:
+            matchesMask[i]=[1,0]
+    step_img = cv2.drawMatchesKnn(
+        img_new,
+        kp_new,
+        img_map,
+        kp_map,
+        matches,
+        None,
+        matchColor=(0,255,0),
+        singlePointColor=(255,0,0),
+        matchesMask=matchesMask,
+        flags=0
+    )
+
+    # Other info.
+    x, y = middle_coordinates(img_new)
+    cv2.line(
+        step_img,
+        (x, y),
+        (x + offset_x, y + offset_y),
+        (255,0,0),
+        2
+    )
+    cv2.circle(step_img, (x, y), 5, (0,0,255), -1)
+    add_text(
+        step_img,
+        '{}, {}'.format(offset_x, offset_y),
+        (x + offset_x, y + offset_y)
+    )
+
+
+    # Save it.
+    cv2.imwrite('debug_{}.png'.format(step_index), step_img)
+
+
+def step(map_path, img_map, img_new, debug=False):
     """Given a new image, update the map and path."""
     sift = cv2.xfeatures2d.SIFT_create()
 
     kp_new, des_new = sift.detectAndCompute(img_new, None)
-    kp_existing, des_existing = sift.detectAndCompute(img_map, None)
+    kp_map, des_map = sift.detectAndCompute(img_map, None)
 
     FLANN_INDEX_KDTREE = 1
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees = 5)
     search_params = dict(checks=50)   # or pass empty dictionary
     flann = cv2.FlannBasedMatcher(index_params, search_params)
 
-    matches = flann.knnMatch(des_new, des_existing, k=2)
+    matches = flann.knnMatch(des_new, des_map, k=2)
 
-    offset_x, offset_y = offsets(matches, kp_existing, kp_new)
+    offset_x, offset_y = offsets(matches, kp_map, kp_new)
 
     img_updated_map, paddings, new_centre = add_to_map(img_map, img_new, offset_x, offset_y)
 
     map_path = shift_path(map_path, paddings[Paddings.Top], paddings[Paddings.Left])
     map_path.append(new_centre)
+
+    if debug:
+        save_progress(
+            len(map_path) - 1,
+            img_new,
+            kp_new,
+            img_map,
+            kp_map,
+            matches,
+            offset_x,
+            offset_y,
+        )
 
     return map_path, img_updated_map
 
@@ -135,16 +189,13 @@ def middle_coordinates(img):
     """Return a tuple of (x, y) pixel coordinates for the centre of the
     image.
     """
-    return (
-        int(img.shape[1] / 2),
-        int(img.shape[0] / 2)
-    )
+    return (img.shape[1] // 2, img.shape[0] // 2)
 
 
-def draw_index(img, index, location):
+def add_text(img, text, location):
     cv2.putText(
         img,
-        str(index),
+        str(text),
         location,
         cv2.FONT_HERSHEY_SIMPLEX,
         0.3,
@@ -163,10 +214,10 @@ def add_overlays(img_map, map_path):
             break
         next = map_path.pop(0)
         cv2.line(img_map, start, next, (255,0,0), 2)
-        draw_index(img_map, idx, start)
+        add_text(img_map, idx, start)
         start = next
         idx += 1
-    draw_index(img_map, idx, start)
+    add_text(img_map, idx, start)
 
 
 def process_test():
@@ -181,7 +232,7 @@ def process_test():
             continue
 
         img_new = cv2.imread(file, 0)
-        map_path, img_map = step(map_path, img_map, img_new)
+        map_path, img_map = step(map_path, img_map, img_new, debug=True)
 
     add_overlays(img_map, map_path)
 
