@@ -18,7 +18,7 @@ On the Pi, as tested with Python 3.5 on Raspbian Strech:
     pip install -r requirements.txt
     chmod 755 serve.sh
 
-aaaaand this bit ... Sorry. This will take a while.
+aaaaand this bit ... Sorry. This will take a while. And by "a while" I mean that "make" took *12 hours on a Pi Zero*. I strongly suggest that you image your SD once you've got "import cv2" working in your environment just in case.
 
     sudo apt-get -y update
     sudo apt-get -y upgrade
@@ -44,6 +44,8 @@ aaaaand this bit ... Sorry. This will take a while.
         -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.3.1/modules \
         -D BUILD_EXAMPLES=ON ..
     make
+    sudo make install
+    sudo ldconfig
 
 Credit: https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
 
