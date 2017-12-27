@@ -40,14 +40,21 @@ aaaaand this bit ... Sorry. This will take a while. And by "a while" I mean that
     cd build/
     cmake -D CMAKE_BUILD_TYPE=RELEASE \
         -D CMAKE_INSTALL_PREFIX=/usr/local \
-        -D INSTALL_PYTHON_EXAMPLES=ON \
         -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.3.1/modules \
-        -D BUILD_EXAMPLES=ON ..
+        -D BUILD_opencv_java=OFF \
+        -D BUILD_opencv_python2=OFF \
+        -D BUILD_opencv_python3=ON \
+        -D PYTHON_DEFAULT_EXECUTABLE=$(which python3) \
+        -D INSTALL_C_EXAMPLES=OFF \
+        -D INSTALL_PYTHON_EXAMPLES=OFF \
+        -D BUILD_EXAMPLES=OFF \
+        -D BUILD_TESTS=OFF \
+        -D BUILD_PERF_TESTS=OFF ..
     make
     sudo make install
     sudo ldconfig
 
-Credit: https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
+Credit: https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/ and https://github.com/ys7yoo/PiOpenCV
 
 ## Running it
 
