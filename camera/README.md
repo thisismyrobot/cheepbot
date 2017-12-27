@@ -13,7 +13,7 @@ On the Pi, as tested in Python 3.5:
 
 ## Running it
 
-On the Pi, as tested in Python 3.5:
+On the Pi, as tested with Python 3.5 on Raspbian Strech:
 
     ./serve.sh
 
