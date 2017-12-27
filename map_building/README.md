@@ -43,8 +43,7 @@ aaaaand this bit ... Sorry. This will take a while.
         -D INSTALL_PYTHON_EXAMPLES=ON \
         -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.3.1/modules \
         -D BUILD_EXAMPLES=ON ..
-    make -j4
-
+    make
 
 Credit: https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
 
