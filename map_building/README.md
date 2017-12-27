@@ -9,6 +9,12 @@ As tested with Python 3.6 on Windows:
     py -m venv venv
     venv\Scripts\activate.bat
     pip install -r requirements.txt
+
+On the Pi, as tested in Python 3.5:
+
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
     chmod 755 serve.sh
 
 ## Running it
