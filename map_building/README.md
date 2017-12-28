@@ -60,6 +60,7 @@ your SD once you've got "import cv2" working in your environment just in case.
         -D INSTALL_PYTHON_EXAMPLES=OFF \
         -D BUILD_EXAMPLES=OFF \
         -D BUILD_TESTS=OFF \
+        -D WITH_FFMPEG=OFF \
         -D BUILD_PERF_TESTS=OFF ..
     make
     sudo make install
@@ -68,7 +69,8 @@ your SD once you've got "import cv2" working in your environment just in case.
 Change the swap file size back to 100 as above.
 
 Credit: https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
-and https://github.com/ys7yoo/PiOpenCV
+and https://github.com/ys7yoo/PiOpenCV and
+https://github.com/opencv/opencv/issues/10080#issuecomment-343976885
 
 ## Running it
 
