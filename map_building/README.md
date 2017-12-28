@@ -13,6 +13,8 @@ As tested with Python 3.6 on Windows:
 
 ### On the Pi, as tested with Python 3.5 on Raspbian Stretch:
 
+**INCOMPLETE AT THIS MOMENT**
+
     python3 -m venv venv
     source venv/bin/activate
     pip install -r requirements.txt
