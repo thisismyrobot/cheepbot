@@ -11,12 +11,21 @@ As tested with Python 3.6 on Windows:
     pip install -r requirements.txt
     pip install opencv-contrib-python==3.3.0.10
 
-On the Pi, as tested with Python 3.5 on Raspbian Strech:
+### On the Pi, as tested with Python 3.5 on Raspbian Stretch:
 
     python3 -m venv venv
     source venv/bin/activate
     pip install -r requirements.txt
     chmod 755 serve.sh
+
+Change swap size to 1 GB temporarily by setting CONF_SWAPSIZE to 1024 in:
+
+    /etc/dphys-swapfile
+
+Then running:
+
+    sudo /etc/init.d/dphys-swapfile stop
+    sudo /etc/init.d/dphys-swapfile start
 
 aaaaand this bit ... Sorry. This will take a while. And by "a while" I mean
 that "make" took **6+ hours on a Pi Zero**. I strongly suggest that you image
@@ -55,6 +64,8 @@ your SD once you've got "import cv2" working in your environment just in case.
     make
     sudo make install
     sudo ldconfig
+
+Change the swap file size back to 100 as above.
 
 Credit: https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
 and https://github.com/ys7yoo/PiOpenCV
