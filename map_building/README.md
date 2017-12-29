@@ -13,8 +13,6 @@ As tested with Python 3.6 on Windows:
 
 ### On the Pi, as tested with Python 3.5 on Raspbian Stretch:
 
-**INCOMPLETE AT THIS MOMENT**
-
     python3 -m venv venv
     source venv/bin/activate
     pip install -r requirements.txt
@@ -68,7 +66,9 @@ your SD once you've got "import cv2" working in your environment just in case.
     sudo make install
     sudo ldconfig
 
-Change the swap file size back to 100 as above.
+    ln -s /usr/local/lib/python3.5/site-packages/cv2.cpython-35m-arm-linux-gnueabihf.so ~/cheepbot/map_building/venv/lib/python3.5/site-packages/cv2.so
+
+Finally, change the swap file size back to 100 as above.
 
 Credit: https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/
 and https://github.com/ys7yoo/PiOpenCV and
