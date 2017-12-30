@@ -55,7 +55,7 @@ def step():
     response.headers['Expires'] = '-1'
 
     # Include the path.
-    response.headers['Robot-Path-to-here'] = json.dumps(the_path)
+    response.headers['Robot-Path'] = json.dumps(the_path)
     return response
 
 
