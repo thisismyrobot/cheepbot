@@ -1,4 +1,5 @@
 """API to the map builder."""
+import json
 import io
 
 import cv2
@@ -48,9 +49,13 @@ def step():
             mimetype='image/jpg'
         )
     )
+    # Disable caching.
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '-1'
+
+    # Include the path.
+    response.headers['Robot-Path-to-here'] = json.dumps(the_path)
     return response
 
 
