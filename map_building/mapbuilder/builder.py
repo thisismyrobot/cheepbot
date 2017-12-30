@@ -41,6 +41,9 @@ def offsets(matches, kp_map, kp_new):
         offsets_x.append(map_x - new_x)
         offsets_y.append(map_y - new_y)
 
+    if len(offsets_x) == 0 or len(offsets_y) == 0:
+        return None, None
+
     offset_x = int(statistics.median(offsets_x))
     offset_y = int(statistics.median(offsets_y))
 
@@ -146,6 +149,8 @@ def step(map_path, img_map, img_new, rotation, debug=False):
 
     kp_map, des_map = sift.detectAndCompute(img_map, None)
     kp_new, des_new = sift.detectAndCompute(img_new, None)
+    if len(kp_new) == 0:
+        return map_path, img_map, False
 
     FLANN_INDEX_KDTREE = 1
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
@@ -153,7 +158,12 @@ def step(map_path, img_map, img_new, rotation, debug=False):
     flann = cv2.FlannBasedMatcher(index_params, search_params)
 
     matches = flann.knnMatch(des_new, des_map, k=2)
+    if len(matches) == 0:
+        return map_path, img_map, False
+
     offset_x, offset_y = offsets(matches, kp_map, kp_new)
+    if offset_x is None or offset_y is None:
+        return map_path, img_map, False
 
     img_updated_map, paddings, new_centre = add_to_map(
         img_map,
@@ -178,7 +188,7 @@ def step(map_path, img_map, img_new, rotation, debug=False):
             offset_y,
         )
 
-    return map_path, img_updated_map
+    return map_path, img_updated_map, True
 
 
 def middle_coordinates(img):
@@ -260,7 +270,7 @@ def process_test():
         with open(file, 'rb') as img_f:
             rotation = read_rotation(img_f.read())
 
-        map_path, img_map = step(map_path, img_map, img_new, rotation, debug=True)
+        map_path, img_map, _ = step(map_path, img_map, img_new, rotation, debug=True)
 
     add_overlays(img_map, map_path)
     cv2.imwrite('combined.png', img_map)

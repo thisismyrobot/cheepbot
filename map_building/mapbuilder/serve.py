@@ -34,11 +34,12 @@ def step():
     data = numpy.fromstring(file_data, dtype=numpy.uint8)
     img = cv2.imdecode(data, 0)
 
+    success = True
     if the_map is None:
         the_map = img
         the_path = [builder.middle_coordinates(img)]
     else:
-        the_path, the_map = builder.step(the_path, the_map, img, rotation)
+        the_path, the_map, success = builder.step(the_path, the_map, img, rotation)
 
     map_bytes = cv2.imencode('.jpg', the_map)[1]
     response_stream = io.BytesIO(map_bytes)
@@ -55,6 +56,7 @@ def step():
     response.headers['Expires'] = '-1'
 
     # Include the path.
+    response.headers['Robot-Step-Succeeded'] = json.dumps(success)
     response.headers['Robot-Path'] = json.dumps(the_path)
     return response
 
