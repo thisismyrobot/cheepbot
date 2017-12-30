@@ -15,7 +15,16 @@ the_map = None
 the_path = []
 
 
-@app.route('/')
+@app.route('/', methods=['DELETE'])
+def reset():
+    global the_map
+    global the_path
+    the_map = None
+    the_path = []
+    return ('', 204)
+
+
+@app.route('/', methods=['GET'])
 def test_page():
     return flask.render_template('test.html')
 
