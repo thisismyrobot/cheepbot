@@ -15,7 +15,7 @@ the_map = None
 the_path = []
 
 
-@app.route('/', methods=['DELETE'])
+@app.route('/map', methods=['DELETE'])
 def reset():
     global the_map
     global the_path
