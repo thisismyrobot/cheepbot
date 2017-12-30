@@ -29,8 +29,32 @@ def test_page():
     return flask.render_template('test.html')
 
 
-@app.route('/', methods=['POST'])
-def step():
+@app.route('/map', methods=['GET'])
+def get_map():
+    global the_map
+    global the_path
+
+    map_bytes = cv2.imencode('.jpg', the_map)[1]
+    response_stream = io.BytesIO(map_bytes)
+
+    response = flask.make_response(
+        flask.send_file(
+            response_stream,
+            mimetype='image/jpg'
+        )
+    )
+    # Disable caching.
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+
+    # Include the path.
+    response.headers['Robot-Path'] = json.dumps(the_path)
+    return response
+
+
+@app.route('/map', methods=['POST'])
+def update_map():
     global the_map
     global the_path
 
@@ -53,20 +77,14 @@ def step():
     map_bytes = cv2.imencode('.jpg', the_map)[1]
     response_stream = io.BytesIO(map_bytes)
 
-    response = flask.make_response(
-        flask.send_file(
-            response_stream,
-            mimetype='image/jpg'
-        )
-    )
+    response = flask.redirect('/map')
+
     # Disable caching.
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '-1'
 
-    # Include the path.
-    response.headers['Robot-Step-Succeeded'] = json.dumps(success)
-    response.headers['Robot-Path'] = json.dumps(the_path)
+    response.headers['Robot-Step-Succeeded'] = success
     return response
 
 

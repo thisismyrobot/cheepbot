@@ -5,13 +5,13 @@
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
         <script type="text/javascript">
             var startOver = function() {
-                $.ajax({url:'/', type: 'DELETE'})
+                $.ajax({url:'/map', type: 'DELETE'})
                 $('iframe').attr('src', '');
             }
         </script>
     </head>
     <body>
-        <form action="/" method="post" enctype="multipart/form-data" target="responses">
+        <form action="/map" method="post" enctype="multipart/form-data" target="responses">
             <input type="file" name="new"/>
             <input type="submit" value="Upload!"/>
             <input type="button" value="clear map" onclick="javascript:startOver()"/>

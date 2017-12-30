@@ -19,10 +19,16 @@ the GPSImgDirection Exif tag.
 
 ### Map builder
 
-POST of an image to http://[ip]:10001 will add that image to a map based on
-SIFT feature detection, returning a composite map image. The "Robot-Path"
+POST of an image to http://[ip]:10001/map will add that image to a map based
+on SIFT feature detection, returning a composite map image. The "Robot-Step-
+Succeeded" header returned in the 302 response is the success flag of adding
+the new image to the map. The 302 response points to the GET on /map.
+
+GET to http://[ip]:10001/map will return the current map. The "Robot-Path"
 header returned is the ordered list of pixel locations on the map for each
 image that was uploaded allowing for path display.
+
+DELETE to http://[ip]:10001/map will reset the map to a fresh start.
 
 GET to http://[ip]:10001 will show a test page for exercising the builder with
 manually uploaded images.
