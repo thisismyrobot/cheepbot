@@ -67,7 +67,7 @@ def add_to_map(img_map, loc_map, img_new, offset_x, offset_y):
         paddings[Paddings.Left],
         paddings[Paddings.Right],
         cv2.BORDER_CONSTANT,
-        value=(0,)
+        value=(255, 0, 0, 0)
     )
 
     # Overlay the new image
@@ -219,7 +219,7 @@ def add_overlays(img_map, map_path):
         if len(map_path) == 0:
             break
         next = map_path.pop(0)
-        cv2.line(img_map, start, next, (255,0,0), 2)
+        cv2.line(img_map, start, next, (255, 0, 0, 128), 2)
         add_text(img_map, idx, start)
         start = next
         idx += 1
@@ -246,11 +246,11 @@ def rotate_and_crop(img, rotation=0):
 
 def read_rotation(img_data):
     """Grab the orientation from the EXIF data."""
-    meta = piexif.load(img_data)
     try:
+        meta = piexif.load(img_data)
         angle, nom = meta['GPS'][piexif.GPSIFD.GPSImgDirection]
         return angle / nom
-    except KeyError:
+    except (KeyError, ValueError):
         return 0
 
 
@@ -261,11 +261,11 @@ def process_test():
     for file in sorted(glob.glob('img/*.jpg')):
 
         if img_map is None:
-            img_map = cv2.imread(file, 4)
+            img_map = cv2.cvtColor(cv2.imread(file), cv2.COLOR_RGB2RGBA)
             map_path.append(middle_coordinates(img_map))
             continue
 
-        img_new = cv2.imread(file, 4)
+        img_new = cv2.cvtColor(cv2.imread(file), cv2.COLOR_RGB2RGBA)
 
         with open(file, 'rb') as img_f:
             rotation = read_rotation(img_f.read())

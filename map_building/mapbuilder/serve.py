@@ -65,7 +65,7 @@ def update_map():
     file_data = in_memory_file.getvalue()
     rotation = builder.read_rotation(file_data)
     data = numpy.fromstring(file_data, dtype=numpy.uint8)
-    img = cv2.imdecode(data, 4)
+    img = cv2.cvtColor(cv2.imdecode(data), cv2.COLOR_RGB2RGBA)
 
     success = True
     if the_map is None:
