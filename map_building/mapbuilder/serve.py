@@ -34,13 +34,13 @@ def get_map():
     global the_map
     global the_path
 
-    map_bytes = cv2.imencode('.jpg', the_map)[1]
+    map_bytes = cv2.imencode('.png', the_map)[1]
     response_stream = io.BytesIO(map_bytes)
 
     response = flask.make_response(
         flask.send_file(
             response_stream,
-            mimetype='image/jpg'
+            mimetype='image/png'
         )
     )
     # Disable caching.
@@ -65,7 +65,7 @@ def update_map():
     file_data = in_memory_file.getvalue()
     rotation = builder.read_rotation(file_data)
     data = numpy.fromstring(file_data, dtype=numpy.uint8)
-    img = cv2.imdecode(data, 0)
+    img = cv2.imdecode(data, 4)
 
     success = True
     if the_map is None:
@@ -74,7 +74,7 @@ def update_map():
     else:
         the_path, the_map, success = builder.step(the_path, the_map, img, rotation)
 
-    map_bytes = cv2.imencode('.jpg', the_map)[1]
+    map_bytes = cv2.imencode('.png', the_map)[1]
     response_stream = io.BytesIO(map_bytes)
 
     response = flask.redirect('/map')

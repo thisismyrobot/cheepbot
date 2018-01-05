@@ -261,11 +261,11 @@ def process_test():
     for file in sorted(glob.glob('img/*.jpg')):
 
         if img_map is None:
-            img_map = cv2.imread(file, 0)
+            img_map = cv2.imread(file, 4)
             map_path.append(middle_coordinates(img_map))
             continue
 
-        img_new = cv2.imread(file, 0)
+        img_new = cv2.imread(file, 4)
 
         with open(file, 'rb') as img_f:
             rotation = read_rotation(img_f.read())
