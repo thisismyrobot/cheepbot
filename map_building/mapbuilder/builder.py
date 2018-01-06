@@ -113,48 +113,7 @@ def shift_path(existing_path, padding_top, padding_left):
             in existing_path]
 
 
-def save_step_debug(step_index, img_new, kp_new, img_map, kp_map, matches, offset_x, offset_y):
-    """Diagnostic-helpers tracking progress."""
-
-    # Basic KNN data.
-    matchesMask = [[0,0] for i in range(len(matches))]
-    for i,(m,n) in enumerate(matches):
-        if m.distance < 0.7*n.distance:
-            matchesMask[i]=[1,0]
-    step_img = cv2.drawMatchesKnn(
-        img_new,
-        kp_new,
-        img_map,
-        kp_map,
-        matches,
-        None,
-        matchColor=(0,255,0),
-        singlePointColor=(255,0,0),
-        matchesMask=matchesMask,
-        flags=0
-    )
-
-    # Other info.
-    x, y = middle_coordinates(img_new)
-    cv2.line(
-        step_img,
-        (x, y),
-        (x + offset_x, y + offset_y),
-        (255,0,0),
-        2
-    )
-    cv2.circle(step_img, (x, y), 5, (0,0,255), -1)
-    add_text(
-        step_img,
-        '{}, {}'.format(offset_x, offset_y),
-        (x + offset_x, y + offset_y)
-    )
-
-    # Save it.
-    cv2.imwrite('debug_{}.png'.format(step_index), step_img)
-
-
-def step(map_path, img_map, img_new, rotation, debug=False):
+def step(map_path, img_map, img_new, rotation):
     """Given a new image, update the map and path."""
     img_new = prepare_img(img_new, -rotation)
 
@@ -188,18 +147,6 @@ def step(map_path, img_map, img_new, rotation, debug=False):
 
     map_path = shift_path(map_path, paddings[Paddings.Top], paddings[Paddings.Left])
     map_path.append(new_centre)
-
-    if debug:
-        save_step_debug(
-            len(map_path) - 1,
-            img_new,
-            kp_new,
-            img_map,
-            kp_map,
-            matches,
-            offset_x,
-            offset_y,
-        )
 
     return map_path, img_updated_map, True
 
@@ -302,7 +249,7 @@ def process_test():
         with open(file, 'rb') as img_f:
             rotation = read_rotation(img_f.read())
 
-        map_path, img_map, _ = step(map_path, img_map, img_new, rotation, debug=True)
+        map_path, img_map, _ = step(map_path, img_map, img_new, rotation)
 
     add_overlays(img_map, map_path)
     cv2.imwrite('combined.png', img_map)
