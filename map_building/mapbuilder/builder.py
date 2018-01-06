@@ -60,32 +60,45 @@ def add_to_map(img_map, loc_map, img_new, offset_x, offset_y):
         offset_x,
         offset_y
     )
-    img_result = cv2.copyMakeBorder(
+    img_map = cv2.copyMakeBorder(
         img_map,
         paddings[Paddings.Top],
         paddings[Paddings.Bottom],
         paddings[Paddings.Left],
         paddings[Paddings.Right],
         cv2.BORDER_CONSTANT,
-        value=(255, 0, 0, 0)
+        value=(0, 0, 0, 0)
     )
 
-    # Overlay the new image
-    map_row_start = max(offset_y, 0)
-    map_row_size = img_new.shape[0] + max(offset_y, 0)
-    map_col_start = max(offset_x, 0)
-    map_col_size = img_new.shape[1] + max(offset_x, 0)
-    img_result[
-        map_row_start:map_row_size,
-        map_col_start:map_col_size,
-    ] = img_new[
-        0:img_new.shape[0],
-        0:img_new.shape[1],
-    ]
+    # Create a mask from the new image.
+    img_new_mask = img_new[:, :, 3]
 
-    return img_result, paddings, (  # Location in the new map of the centre of the new image.
-        map_col_start + (img_new.shape[1] // 2),
-        map_row_start + (img_new.shape[0] // 2),
+    # We'll apply an inverted mask to black out parts of the map.
+    img_map_mask = cv2.bitwise_not(img_new_mask)
+
+    # The bit of the map where we'll stuff the new image.
+    map_roi = geometry.map_roi(img_new.shape, offset_x, offset_y)
+
+    # Black out the bit of the map ROI where we'll put the new image.
+    img_map_roi = img_map[map_roi[0]:map_roi[1], map_roi[2]:map_roi[3]]
+    img_map_roi = cv2.bitwise_and(img_map_roi, img_map_roi, mask = img_map_mask)
+
+    # Overlay the new image in the ROI from the map.
+    img_map_roi = cv2.add(
+        img_map_roi,
+        cv2.bitwise_and(img_new, img_new, mask = img_new_mask)
+    )
+
+    # Restore the ROI back into the original map.
+    img_map[map_roi[0]:map_roi[1], map_roi[2]:map_roi[3]] = img_map_roi
+    return (
+        img_map,
+        paddings,
+        (
+            # Location in the new map of the centre of the new image.
+            max(offset_x, 0) + (img_new.shape[1] // 2),
+            max(offset_y, 0) + (img_new.shape[0] // 2),
+        )
     )
 
 
@@ -143,7 +156,7 @@ def save_step_debug(step_index, img_new, kp_new, img_map, kp_map, matches, offse
 
 def step(map_path, img_map, img_new, rotation, debug=False):
     """Given a new image, update the map and path."""
-    img_new = rotate_and_crop(img_new, -rotation)
+    img_new = prepare_img(img_new, -rotation)
 
     sift = cv2.xfeatures2d.SIFT_create()
 
@@ -219,21 +232,27 @@ def add_overlays(img_map, map_path):
         if len(map_path) == 0:
             break
         next = map_path.pop(0)
-        cv2.line(img_map, start, next, (255, 0, 0, 128), 2)
+        cv2.line(img_map, start, next, (0, 0, 255, 128), 2)
         add_text(img_map, idx, start)
         start = next
         idx += 1
     add_text(img_map, idx, start)
 
 
-def rotate_and_crop(img, rotation=0):
+def prepare_img(img, rotation=0):
     rows, cols = img.shape[:2]
 
     if rotation is None:
         img_rotated = img
     else:
         the_matrix = cv2.getRotationMatrix2D((rows / 2, cols / 2), rotation, 1)
-        img_rotated = cv2.warpAffine(img, the_matrix, (cols, rows))
+        img_rotated = cv2.warpAffine(
+            img,
+            the_matrix,
+            (cols, rows),
+            borderMode=cv2.BORDER_TRANSPARENT)
+
+    return img_rotated
 
     max_dim = int(rows / math.sqrt(2))  # Borderless rotation.
     vert_crop = (rows - max_dim) // 2

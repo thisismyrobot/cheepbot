@@ -31,3 +31,18 @@ def paddings(shape_map, shape_new, offset_x, offset_y):
         pad_left,
         pad_right,
     )
+
+
+def map_roi(shape_new, offset_x, offset_y):
+    """Given a new shape and offsets on the map, return the ROI values."""
+    map_row_start = max(offset_y, 0)
+    map_row_size = shape_new[0] + max(offset_y, 0)
+    map_col_start = max(offset_x, 0)
+    map_col_size = shape_new[1] + max(offset_x, 0)
+
+    return (
+        map_row_start,
+        map_row_size,
+        map_col_start,
+        map_col_size,
+    )

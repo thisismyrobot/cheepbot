@@ -1,5 +1,5 @@
 Flask==0.12.2
-piexif==1.0.13
 numpy==1.13.3
+piexif==1.0.13
 pytest==3.3.1
 waitress==1.1.0
