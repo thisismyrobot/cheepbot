@@ -212,14 +212,6 @@ def prepare_img(img, rotation=0):
 
     return img_rotated
 
-    max_dim = int(rows / math.sqrt(2))  # Borderless rotation.
-    vert_crop = (rows - max_dim) // 2
-    horiz_crop = (cols - max_dim) // 2
-    return img_rotated[
-        vert_crop:vert_crop+max_dim,
-        horiz_crop:horiz_crop+max_dim
-    ]
-
 
 def read_rotation(img_data):
     """Grab the orientation from the EXIF data."""
