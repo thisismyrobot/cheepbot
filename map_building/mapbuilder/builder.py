@@ -240,11 +240,22 @@ def add_overlays(img_map, map_path):
 
 
 def prepare_img(img, rotation=0):
-    rows, cols = img.shape[:2]
 
-    if rotation is None:
+    max_size = math.hypot(*img.shape[:2])
+    img = cv2.copyMakeBorder(
+        img,
+        int((max_size - img.shape[0]) // 2),
+        int((max_size - img.shape[0]) // 2),
+        int((max_size - img.shape[1]) // 2),
+        int((max_size - img.shape[1]) // 2),
+        cv2.BORDER_CONSTANT,
+        value=(0, 0, 0, 0)
+    )
+
+    if rotation == 0:
         img_rotated = img
     else:
+        rows, cols = img.shape[:2]
         the_matrix = cv2.getRotationMatrix2D((rows / 2, cols / 2), rotation, 1)
         img_rotated = cv2.warpAffine(
             img,
@@ -280,7 +291,9 @@ def process_test():
     for file in sorted(glob.glob('img/*.jpg')):
 
         if img_map is None:
-            img_map = cv2.cvtColor(cv2.imread(file), cv2.COLOR_RGB2RGBA)
+            img_map = prepare_img(
+                cv2.cvtColor(cv2.imread(file), cv2.COLOR_RGB2RGBA)
+            )
             map_path.append(middle_coordinates(img_map))
             continue
 
