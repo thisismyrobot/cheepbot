@@ -14,4 +14,7 @@ def webapp():
     testapp = flask_webtest.TestApp(mapbuilder.serve.app)
     testapp.app.debug = True
 
+    # Make sure there's no map.
+    testapp.delete('/map')
+
     return testapp
