@@ -1,4 +1,5 @@
 """Test of the server's behaviour."""
+import json
 
 
 def test_uploading_two_images_combines_them(webapp):
@@ -42,4 +43,4 @@ def when_the_map_is_retrieved(webapp):
 
 
 def when_the_path_is_retrieved(webapp):
-    return webapp.get('/map').headers['Robot-Path']
+    return json.loads(webapp.get('/map').headers['Robot-Path'])

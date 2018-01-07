@@ -21,7 +21,7 @@ def reset():
     global the_path
     the_map = None
     the_path = []
-    return ('', 204)
+    return ('', 200)
 
 
 @app.route('/', methods=['GET'])
@@ -61,7 +61,6 @@ def update_map():
     uploaded = flask.request.files['new']
     in_memory_file = io.BytesIO()
     uploaded.save(in_memory_file)
-    uploaded.seek(0)
     file_data = in_memory_file.getvalue()
     rotation = builder.read_rotation(file_data)
     data = numpy.fromstring(file_data, dtype=numpy.uint8)
