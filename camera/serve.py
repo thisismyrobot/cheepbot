@@ -35,5 +35,5 @@ def photo():
 
 if __name__ == '__main__':
     camera = picamera.PiCamera()
-    camera.resolution = (640, 640)
+    camera.resolution = (320, 240)
     waitress.serve(app, listen='*:10000')
