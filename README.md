@@ -35,9 +35,11 @@ manually uploaded images.
 
 ### Motor
 
-http://[ip]:10002/motor/command
+Very WIP.
 
-WIP. 
+POST 'command' of 'forward' or 'stop' to http://[ip]:10002/motor/command
+
+GET http://[ip]:10002/motor for a test page.
 
 ## Typo?
 
