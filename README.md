@@ -33,6 +33,12 @@ DELETE to http://[ip]:10001/map will reset the map to a fresh start.
 GET to http://[ip]:10001 will show a test page for exercising the builder with
 manually uploaded images.
 
+### Motor
+
+http://[ip]:10002/motor/command
+
+WIP. 
+
 ## Typo?
 
 The spelling is not a typo, it's a nod to a joke about what sound a 30 foot

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Motor test page</title>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript">
+            var send = function (command) {
+                $.post('/motor/command', {
+                    'command': command
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <input type="button" value="forward" onclick="javascript:send('forward')"/>
+        <input type="button" value="stop" onclick="javascript:send('stop')"/>
+    </body>
+</html>
