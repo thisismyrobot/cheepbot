@@ -32,6 +32,7 @@ def take_command():
     with serial.Serial('/dev/ttyS0', 38400, timeout=1) as conn:
         conn.write(command_bytes)
 
+    return ('', 200)
 
 
 if __name__ == '__main__':
