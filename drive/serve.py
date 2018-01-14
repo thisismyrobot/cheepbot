@@ -30,7 +30,7 @@ def take_command():
     command_bytes = getattr(commands, command)()
 
     with serial.Serial('/dev/ttyS0', 38400, timeout=1) as conn:
-        conn.send(command_bytes)
+        conn.write(command_bytes)
 
 
 
