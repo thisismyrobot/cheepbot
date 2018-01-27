@@ -27,7 +27,7 @@ def add_rotation(img_stream):
     rotation = get_rotation()
     gps_tags = {
         piexif.GPSIFD.GPSImgDirectionRef: 'M',
-        piexif.GPSIFD.GPSImgDirection: (rotation, 100),
+        piexif.GPSIFD.GPSImgDirection: (rotation, 1),
     }
     exif_bytes = piexif.dump({'GPS': gps_tags})
     updated_stream = io.BytesIO()
