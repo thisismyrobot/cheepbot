@@ -1,10 +1,12 @@
 """RESTful compass reader."""
 import flask
+import flask_cors
 import serial
 import waitress
 
 
 app = flask.Flask(__name__)
+flask_cors.CORS(app)
 
 
 @app.route('/', methods=['GET'])

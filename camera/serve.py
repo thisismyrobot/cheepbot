@@ -2,6 +2,7 @@
 import io
 
 import flask
+import flask_cors
 import picamera
 import piexif
 import requests
@@ -9,6 +10,7 @@ import waitress
 
 
 app = flask.Flask(__name__)
+flask_cors.CORS(app)
 camera = None
 
 

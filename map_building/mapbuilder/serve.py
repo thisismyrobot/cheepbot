@@ -4,6 +4,7 @@ import io
 
 import cv2
 import flask
+import flask_cors
 import numpy
 import waitress
 
@@ -11,6 +12,7 @@ import mapbuilder.builder as builder
 
 
 app = flask.Flask(__name__)
+flask_cors.CORS(app)
 the_map = None
 the_path = []
 
