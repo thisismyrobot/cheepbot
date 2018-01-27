@@ -4,6 +4,7 @@ import io
 import flask
 import picamera
 import piexif
+import requests
 import waitress
 
 
@@ -11,9 +12,19 @@ app = flask.Flask(__name__)
 camera = None
 
 
+def get_rotation():
+    """Read the orientation from the compass."""
+    return int(
+        requests.get(
+            'http://localhost:10003',
+            timeout=2
+        ).json()['orientation']
+    )
+
+
 def add_rotation(img_stream):
     """Add rotation information to the exif data."""
-    rotation = 0  # Until we get a sensor...
+    rotation = get_rotation()
     gps_tags = {
         piexif.GPSIFD.GPSImgDirectionRef: 'M',
         piexif.GPSIFD.GPSImgDirection: (rotation, 100),
