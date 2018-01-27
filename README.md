@@ -7,6 +7,10 @@
 A set of RESTful HTTP microservices running on a Raspberry Pi Zero, inside a
 very cheap Roomba clone.
 
+## Command centre
+
+WIP. At http://[ip]:9999/
+
 ## Services
 
 This will grow over time of course.
