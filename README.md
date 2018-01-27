@@ -41,6 +41,10 @@ POST 'command' of 'forward' or 'stop' to http://[ip]:10002/motor/command
 
 GET http://[ip]:10002/motor for a test page.
 
+### Compass
+
+GET http://[ip]:10003/ for the current magnetic orientation.
+
 ## Typo?
 
 The spelling is not a typo, it's a nod to a joke about what sound a 30 foot
